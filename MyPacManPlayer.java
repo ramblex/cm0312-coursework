@@ -24,7 +24,7 @@ import pacman.*;
  *
  * @author Alex Duller
  */
-public class AlexPacManPlayer implements PacManPlayer
+public class MyPacManPlayer implements PacManPlayer
 {
     // Depth to traverse in game tree
     private final double MAX_DEPTH = 15;
