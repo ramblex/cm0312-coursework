@@ -12,10 +12,9 @@ import pacman.*;
 /**
  * CM0312 coursework
  *
- * The class uses minimax, alpha-beta pruning and allows for random ghost moves
- * to be considered. Each of the heuristics in the evaluation has been weighted
- * in order to make the pacman player more aggressive and try to gobble dots as
- * quickly as possible. 
+ * The class uses minimax, alpha-beta pruning and Star1 *-Minimax. Each of the
+ * heuristics in the evaluation has been weighted in order to make the pacman
+ * player more aggressive and try to gobble dots as quickly as possible.
  *
  * The search tree is also reduced by ignoring moving in the opposite direction
  * within the tree.
@@ -43,8 +42,8 @@ public class AlexPacManPlayer implements PacManPlayer
     private final double GHOST_DIST_SCALING_FACTOR = 0.1;
     private final double LOSING_SCORE = -5000;
     private final double WINNING_SCORE = 5000;
-    // Set this to true if ghosts always choose the worst move for pacman
-    private final boolean OPTIMAL_GHOSTS = true;
+    private final double L = LOSING_SCORE;
+    private final double U = WINNING_SCORE;
 
     public Move chooseMove(Game game)
     {
@@ -154,28 +153,29 @@ public class AlexPacManPlayer implements PacManPlayer
             return evaluate(state);
 
         Set<List<Move>> combined = Game.getLegalCombinedGhostMoves(state);
-        if (!OPTIMAL_GHOSTS)
-        {
-            Random rand = new Random(System.currentTimeMillis());
-            List<Move> rand_move =
-                (List<Move>)combined.toArray()[rand.nextInt(combined.size())];
-            combined.clear();
-            combined.add(rand_move);
-        }
-        double v = Double.POSITIVE_INFINITY;
+        double N = combined.size();
+        double A = N * (alpha - U) + U;
+        double B = N * (beta - L) + L;
+        double vsum = 0;
         for (List<Move> move : combined)
         {
-            v = Math.min(v, max_value(Game.getNextState(state, move),
-                                      prev_move,
-                                      alpha,
-                                      beta,
-                                      depth - 1));
-            if (v > alpha)
-                beta = Math.min(beta, v);
-            else
-                break;
+            double AX = Math.max(A, L);
+            double BX = Math.min(B, U);
+            double v =  max_value(Game.getNextState(state, move),
+                                  prev_move,
+                                  AX,
+                                  BX,
+                                  depth - 1);
+            if (v <= A)
+                return alpha;
+            if (v >= B)
+                return beta;
+            vsum += v;
+            A += U - v;
+            B += L - v;
+            
         }
-        return v;
+        return (vsum / N);
     }
 
     /**
