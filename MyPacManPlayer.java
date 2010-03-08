@@ -19,8 +19,8 @@ import pacman.*;
  * The search tree is also reduced by ignoring moving in the opposite direction
  * within the tree.
  *
- * Against basic ghosts the aforementioned approach has got to level 250
- * without losing a life.
+ * Against basic ghosts the aforementioned approach has got to level 200
+ * in about 90000 time without losing a life.
  *
  * @author Alex Duller
  */
