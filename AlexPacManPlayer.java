@@ -19,7 +19,7 @@ import pacman.*;
  * The search tree is also reduced by ignoring moving in the opposite direction
  * within the tree.
  *
- * Against basic ghosts the aforementioned approach can get to level 250
+ * Against basic ghosts the aforementioned approach has got to level 250
  * without losing a life.
  *
  * @author Alex Duller
@@ -153,6 +153,7 @@ public class AlexPacManPlayer implements PacManPlayer
             return evaluate(state);
 
         Set<List<Move>> combined = Game.getLegalCombinedGhostMoves(state);
+        // This is taken from Slide 17 Lecture II.3 
         double N = combined.size();
         double A = N * (alpha - U) + U;
         double B = N * (beta - L) + L;
