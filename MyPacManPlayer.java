@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Iterator;
 
 import util.*;
 import pacman.*;
@@ -27,7 +28,7 @@ import pacman.*;
 public class MyPacManPlayer implements PacManPlayer
 {
     // Depth to traverse in game tree
-    private final double MAX_DEPTH = 15;
+    private final double MAX_DEPTH = 19;
     // Keep track of the last move since we penalise moving in the opposite
     // direction
     private Move last_move = Move.NONE;
@@ -40,6 +41,7 @@ public class MyPacManPlayer implements PacManPlayer
     private final double DOT_DIST_SCALING_FACTOR = 0.2;
     // Amount to multiply distance from ghosts (used in evaluation function)
     private final double GHOST_DIST_SCALING_FACTOR = 0.1;
+    private final double GHOST_MAX_RANGE = 5;
     private final double LOSING_SCORE = -5000;
     private final double WINNING_SCORE = 5000;
     private final double L = LOSING_SCORE;
@@ -210,17 +212,50 @@ public class MyPacManPlayer implements PacManPlayer
         // pacman seems to work quite well if he's aggressive and largely
         // ignores the movements of the basic ghosts - this may not be the case
         // if more aggressive ghosts were used!
-        score +=
-            Location.manhattanDistanceToClosest(p, state.getGhostLocations())
-            * GHOST_DIST_SCALING_FACTOR;
-        score -= num_groups(state.getDotLocations());
+        score += avg_ghost_dist_towards(state) * GHOST_DIST_SCALING_FACTOR;
+        score -= num_ghosts_in_range(p, state.getGhostLocations());
         return score;
     }
 
-    // Work out the number of groups of dots
-    private double num_groups(Collection<Location> dots)
+    private double avg_ghost_dist_towards(State state)
     {
+        State parent = state.getParent();
+        Location p = state.getPacManLocation();
+        Collection<Location> current_ghosts = state.getGhostLocations();
+        Collection<Location> prev_ghosts = parent.getGhostLocations();
+        Iterator<Location> itr = prev_ghosts.iterator();
+        double sum_dist = 0;
 
-        return 1;
+        for (Location ghost : current_ghosts)
+        {
+            double current_dist = Location.manhattanDistance(p, ghost);
+            double prev_dist = Location.manhattanDistance(p, itr.next());
+            // Make ghosts which are moving towards pacman seem twice as close
+            if (current_dist < prev_dist)
+                current_dist /= 2;
+            sum_dist += current_dist;
+        }
+        return (sum_dist / current_ghosts.size());
+    }
+
+    /**
+     * Determine the number of ghosts that are less than GHOST_MAX_RANGE from
+     * pacman.
+     *
+     * @param pacman Pacman location
+     * @param ghosts Ghost locations
+     * @return Number of ghosts which are close to pacman.
+     */
+    private int num_ghosts_in_range(Location pacman, 
+                                    Collection<Location> ghosts)
+    {
+        int num_in_range = 0; 
+        for (Location ghost : ghosts)
+        {
+            double dist = Location.manhattanDistance(pacman, ghost);
+            if (dist < GHOST_MAX_RANGE)
+                num_in_range++;
+        }
+        return num_in_range;
     }
 }
