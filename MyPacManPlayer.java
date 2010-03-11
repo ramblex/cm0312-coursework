@@ -14,14 +14,11 @@ import pacman.*;
  * CM0312 coursework
  *
  * The class uses minimax, alpha-beta pruning and Star1 *-Minimax. Each of the
- * heuristics in the evaluation has been weighted in order to make the pacman
+ * heuristics in the evaluation have been weighted in order to make the pacman
  * player more aggressive and try to gobble dots as quickly as possible.
  *
  * The search tree is also reduced by ignoring moving in the opposite direction
  * within the tree.
- *
- * Against basic ghosts the aforementioned approach has got to level 200
- * in about 90000 time without losing a life.
  *
  * @author Alex Duller
  */
